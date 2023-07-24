@@ -329,6 +329,7 @@ def create_show():
     return jsonify({"message": "Show created successfully", "show_id": str(show.id)}), 201
 
 
+
 # Get all shows data
 @app.route('/shows', methods=['GET'])
 def get_shows():
@@ -347,6 +348,24 @@ def get_show_by_id(show_id):
     show = Show.objects(id=show_id).first()
     if not show:
         return jsonify({"message": f"Show not found with ID {show_id}"}), 404
+
+    shows_data = {
+        "id":str(show.id),
+        "movie_id": str(show.movie_id.id),
+        "theater_id": str(show.theater_id.id),
+        "show_timing": show.show_timing,
+        "category": show.category
+    }
+
+    return jsonify(shows_data), 200
+
+
+# get a show by movie_id
+@app.route('/shows/movie/<string:movie_id>', methods=['GET'])
+def get_show_by_movie_id(movie_id):
+    show = Show.objects(movie_id=movie_id).first()
+    if not show:
+        return jsonify({"message": f"Show not found with ID {movie_id}"}), 404
 
     shows_data = {
         "id":str(show.id),
