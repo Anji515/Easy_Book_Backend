@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, g
+from flask import Flask, jsonify, request, g, render_template
 from flask_pymongo import PyMongo
 from dotenv import load_dotenv
 import os
@@ -541,6 +541,11 @@ def remove_participant(event_id):
         return jsonify({'message': 'Participant not found in the event'}), 404
     else:
         return jsonify({'message': 'Event not found'}), 404
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
