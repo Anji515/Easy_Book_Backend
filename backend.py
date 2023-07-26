@@ -125,15 +125,14 @@ def adminLogin():
     # Retrieve the data from the request
     email = request.args.get('email')
     password = request.args.get('password')
-
+    token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNjI3NTI2MDQ4LCJleHAiOjE2Mjc1MjY2NDh9.zDmq7HLMmHwlgvCmW7tDxx-l6wAeTRTJ_zAxCThsPaI"
     # Find the user document by username
     user = mongo.db.users.find_one({"email": email})
     # print(user)
     if user and bcrypt.check_password_hash(user["password"], password):
-        return json_util.dumps(user), 200
+        return json_util.dumps({"user":user,"token":token}), 200
     else:
         return jsonify({"Error": "Invalid username or password"}), 201
-
 
 # Posting a Movie
 
