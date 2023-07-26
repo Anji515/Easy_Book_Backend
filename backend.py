@@ -9,6 +9,7 @@ from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from bson import json_util, ObjectId
 from models import Movie, Show, Theater
+import openai
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -541,11 +542,44 @@ def remove_participant(event_id):
         return jsonify({'message': 'Participant not found in the event'}), 404
     else:
         return jsonify({'message': 'Event not found'}), 404
+    
+# Set up the OpenAI API
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def catch_all(path):
-    return render_template('index.html')
+openai.api_key = os.getenv("openai.api_key")
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.json
+    user_input = data['message']
+    response = generate_chat_response(user_input)
+    return jsonify({'response': response})
+
+# Predefined questions and default answers
+default_responses = {
+    "What is the status of my ticket?": "Hello Sir/Madam your ticket booking is in progress ",
+    "Best movie of the day": "The best movie of the day is Avatar",
+    "What can you do?": "I can answer your questions and have a conversation with you.",
+     "What is your name?":"My name is bookEasy  chatbot, i am here to help you queries related to your tickets"
+}
+
+# Function to generate chat responses
+def generate_chat_response(user_input):
+
+    # Check if the user's input matches a predefined question
+    if user_input in default_responses:
+        return default_responses[user_input]
+    
+    # Generate a response using OpenAI GPT-3.5 model
+    result = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt="you have to act like chat bot similary like bookmyshow app chat bot who give only answer to user who ask movie booking and movies show, event, webseries related question if they ask other question bot reply i dont have idea about it"+"this user input"+user_input+"please make sure it ask releavent question only , also if user ask any question related to movie ticket event ticket  please answer it in random manner with random data",
+        max_tokens=50,
+        temperature=0.8,
+        n=1,
+        stop=None,
+        timeout=15
+    )
+    
+    return result.choices[0].text.strip()
 
 if __name__ == '__main__':
     app.run(debug=True)
